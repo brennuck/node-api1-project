@@ -53,35 +53,60 @@ server.post("/api/users", (req, res) => {
           .status(400)
           .json({ errorMessage: "Please provide name and bio for the user." });
       } else {
+        Users.insert(userData);
         res.status(201).json(user);
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({
+        errorMessage: "There was an error while saving the user to the database"
+      });
+    });
+});
+
+server.delete("/api/users/:id", (req, res) => {
+  const id = req.params.id;
+  Users.remove(id)
+    .then(user => {
+      if (!user) {
+        res
+          .status(404)
+          .json({ message: "The user with the specified ID does not exist." });
+      } else {
+        res.status(200).json(user);
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ errorMessage: "The user could not be removed" });
+    });
+});
+
+server.put("/api/users/:id", (req, res) => {
+  const id = req.params.id;
+  const updates = req.body;
+  Users.update(id, updates)
+    .then(user => {
+      if (!user) {
+        res
+          .status(404)
+          .json({ message: "The user with the specified ID does not exist." });
+      } else if (!updates.name || !updates.bio) {
+        res
+          .status(400)
+          .json({ errorMessage: "Please provide name and bio for the user." });
+      } else {
+        res.status(200).json(user);
       }
     })
     .catch(error => {
       console.log(error);
       res
         .status(500)
-        .json({
-          errorMessage:
-            "There was an error while saving the user to the database"
-        });
+        .json({ errorMessage: "The user information could not be modified." });
     });
 });
-
-server.delete("/api/users/:id", (req, res) => {
-    const id = req.params.id
-    Users.remove(id)
-    .then(user => {
-        if (!user) {
-            res.status(404).json({ message: "The user with the specified ID does not exist." })
-        } else {
-            res.status(200).json(user)
-        }
-    })
-    .catch(error => {
-        console.log(error)
-        res.status(500).json({ errorMessage: "The user could not be removed" })
-    })
-})
 
 const port = 1234;
 server.listen(port, () => {
