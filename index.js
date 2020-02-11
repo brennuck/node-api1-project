@@ -41,6 +41,23 @@ server.get("/api/users/:id", (req, res) => {
     })
 })
 
+server.post("/api/users", (req, res) => {
+    const userData = req.body;
+
+    Users.insert(userData)
+    .then(user => {
+        if (!userData.name || !userData.bio) {
+            res.status(400).json({ errorMessage: "Please provide name and bio for the user." })
+        } else {
+            res.status(201).json(user)
+        }
+    })
+    .catch(error => {
+        console.log(error)
+        res.status(500).json({ errorMessage: "There was an error while saving the user to the database" })
+    })
+})
+
 const port = 1234;
 server.listen(port, () => {
   console.log(`api running on port: ${port}`);
